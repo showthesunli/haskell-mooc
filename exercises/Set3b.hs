@@ -137,7 +137,9 @@ sumsOf (x : xs) = x : f x xs
 --   merge [1,1,6] [1,2]   ==> [1,1,1,2,6]
 
 merge :: [Int] -> [Int] -> [Int]
-merge xs ys = todo
+merge xs [] = xs
+merge [] ys = ys
+merge (x : xs) (y : ys) = if x <= y then x : merge xs (y : ys) else y : merge (x : xs) ys
 
 ------------------------------------------------------------------------------
 -- Ex 8: compute the biggest element, using a comparison function
@@ -165,7 +167,11 @@ merge xs ys = todo
 --     ==> ("Mouse",8)
 
 mymaximum :: (a -> a -> Bool) -> a -> [a] -> a
-mymaximum bigger initial xs = todo
+mymaximum bigger initial [] = initial
+mymaximum bigger initial (x : xs) =
+  if bigger initial x
+    then mymaximum bigger initial xs
+    else mymaximum bigger x xs
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a version of map that takes a two-argument function
@@ -179,7 +185,9 @@ mymaximum bigger initial xs = todo
 -- Use recursion and pattern matching. Do not use any library functions.
 
 map2 :: (a -> b -> c) -> [a] -> [b] -> [c]
-map2 f as bs = todo
+map2 f _ [] = []
+map2 f [] _ = []
+map2 f (a : as) (b : bs) = f a b : map2 f as bs
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the function maybeMap, which works a bit like a
@@ -203,4 +211,7 @@ map2 f as bs = todo
 --   ==> []
 
 maybeMap :: (a -> Maybe b) -> [a] -> [b]
-maybeMap f xs = todo
+maybeMap f [] = []
+maybeMap f (x : xs) = case f x of
+  Just y -> y : maybeMap f xs
+  Nothing -> maybeMap f xs
