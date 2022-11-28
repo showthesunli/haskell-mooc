@@ -1,3 +1,5 @@
+import Data.List
+
 type State = Int
 
 newtype ST a = S (State -> (a, State))
