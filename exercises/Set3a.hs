@@ -270,7 +270,8 @@ multiCompose (f : fs) = f . (multiCompose fs)
 --   multiApp id [head, (!!2), last] "axbxc" ==> ['a','b','c'] i.e. "abc"
 --   multiApp sum [head, (!!2), last] [1,9,2,9,3] ==> 6
 
-multiApp = todo
+multiApp :: ([b] -> c) -> [a -> b] -> a -> c
+multiApp f gs x = f [g x | g <- gs]
 
 ------------------------------------------------------------------------------
 -- Ex 14: in this exercise you get to implement an interpreter for a
@@ -305,4 +306,15 @@ multiApp = todo
 -- function, the surprise won't work.
 
 interpreter :: [String] -> [String]
-interpreter commands = todo
+interpreter commands = inHelper commands (0, 0)
+
+inHelper :: [String] -> (Int, Int) -> [String]
+inHelper [] _ = []
+inHelper (c : cs) (x, y)
+  | c == "up" = inHelper cs (x, y + 1)
+  | c == "down" = inHelper cs (x, y -1)
+  | c == "left" = inHelper cs (x -1, y)
+  | c == "right" = inHelper cs (x + 1, y)
+  | c == "printX" = show x : inHelper cs (x, y)
+  | c == "printY" = show y : inHelper cs (x, y)
+  | otherwise = "BAD" : inHelper cs (x, y)
