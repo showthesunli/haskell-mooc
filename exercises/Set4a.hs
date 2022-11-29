@@ -138,7 +138,7 @@ incrementKey key = map (\(k, v) -> if key == k then (k, v + 1) else (k, v))
 -- length to a Fractional
 
 average :: Fractional a => [a] -> a
-average xs = todo
+average xs = sum xs / fromIntegral (length xs)
 
 ------------------------------------------------------------------------------
 -- Ex 8: given a map from player name to score and two players, return
@@ -157,7 +157,10 @@ average xs = todo
 --     ==> "Lisa"
 
 winner :: Map.Map String Int -> String -> String -> String
-winner scores player1 player2 = todo
+winner scores player1 player2 = if s1 >= s2 then player1 else player2
+  where
+    s1 = Map.findWithDefault 0 player1 scores
+    s2 = Map.findWithDefault 0 player2 scores
 
 ------------------------------------------------------------------------------
 -- Ex 9: compute how many times each value in the list occurs. Return
@@ -172,7 +175,12 @@ winner scores player1 player2 = todo
 --     ==> Map.fromList [(False,3),(True,1)]
 
 freqs :: (Eq a, Ord a) => [a] -> Map.Map a Int
-freqs xs = todo
+freqs = foldr f Map.empty
+  where
+    f cur = Map.alter g cur
+      where
+        g Nothing = Just 1
+        g (Just v) = Just (v + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 10: recall the withdraw example from the course material. Write a
@@ -205,7 +213,12 @@ freqs xs = todo
 --     ==> fromList [("Bob",100),("Mike",50)]
 
 transfer :: String -> String -> Int -> Map.Map String Int -> Map.Map String Int
-transfer from to amount bank = todo
+transfer from to amount bank
+  | Map.notMember from bank || Map.notMember to bank || Map.lookup from bank < Just amount || amount <= 0 = bank
+  | otherwise = defrom from (incto to bank)
+  where
+    defrom from bank = Map.alter (\(Just v) -> if v - amount >= 0 then Just (v - amount) else Nothing) from bank
+    incto to bank = Map.alter (\(Just v) -> Just (v + amount)) to bank
 
 ------------------------------------------------------------------------------
 -- Ex 11: given an Array and two indices, swap the elements in the indices.
@@ -215,7 +228,10 @@ transfer from to amount bank = todo
 --         ==> array (1,4) [(1,"one"),(2,"three"),(3,"two"),(4,"four")]
 
 swap :: Ix i => i -> i -> Array i a -> Array i a
-swap i j arr = todo
+swap i j arr = arr // [(i, vj), (j, vi)]
+  where
+    vi = arr ! i
+    vj = arr ! j
 
 ------------------------------------------------------------------------------
 -- Ex 12: given an Array, find the index of the largest element. You
@@ -226,4 +242,4 @@ swap i j arr = todo
 -- Hint: check out Data.Array.indices or Data.Array.assocs
 
 maxIndex :: (Ix i, Ord a) => Array i a -> i
-maxIndex = todo
+maxIndex arr = fst (maximumBy (\(i, e) (j, q) -> compare e q) (assocs arr))
