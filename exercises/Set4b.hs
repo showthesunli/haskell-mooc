@@ -74,9 +74,11 @@ slHelper d (rd, len) = (d + rd, len + 1)
 myConcat :: [[a]] -> [a]
 myConcat xs = foldr concatHelper concatStart xs
 
-concatStart = todo
+concatStart :: [a]
+concatStart = []
 
-concatHelper = todo
+concatHelper :: [a] -> [a] -> [a]
+concatHelper x xs = x ++ xs
 
 ------------------------------------------------------------------------------
 -- Ex 5: get all occurrences of the largest number in a list with a
@@ -90,7 +92,12 @@ concatHelper = todo
 largest :: [Int] -> [Int]
 largest xs = foldr largestHelper [] xs
 
-largestHelper = todo
+largestHelper :: Int -> [Int] -> [Int]
+largestHelper cur [] = [cur]
+largestHelper cur rest
+  | cur > myMaximum rest = [cur]
+  | cur == myMaximum rest = cur : rest
+  | otherwise = rest
 
 ------------------------------------------------------------------------------
 -- Ex 6: get the first element of a list with a fold. Define
@@ -105,7 +112,8 @@ largestHelper = todo
 myHead :: [a] -> Maybe a
 myHead xs = foldr headHelper Nothing xs
 
-headHelper = todo
+headHelper :: a -> Maybe a -> Maybe a
+headHelper cur rest = Just cur
 
 ------------------------------------------------------------------------------
 -- Ex 7: get the last element of a list with a fold. Define lasthelper
@@ -120,4 +128,6 @@ headHelper = todo
 myLast :: [a] -> Maybe a
 myLast xs = foldr lastHelper Nothing xs
 
-lastHelper = todo
+lastHelper :: a -> Maybe a -> Maybe a
+lastHelper cur (Just rest) = Just rest
+lastHelper cur Nothing = Just cur
