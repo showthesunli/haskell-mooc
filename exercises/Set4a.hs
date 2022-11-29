@@ -16,11 +16,11 @@
 
 module Set4a where
 
-import Mooc.Todo
-import Data.List
-import Data.Ord
-import qualified Data.Map as Map
 import Data.Array
+import Data.List
+import qualified Data.Map as Map
+import Data.Ord
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: implement the function allEqual which returns True if all
@@ -35,7 +35,9 @@ import Data.Array
 -- you remove the Eq a => constraint from the type!
 
 allEqual :: Eq a => [a] -> Bool
-allEqual xs = todo
+allEqual xs = foldr eq True xs
+  where
+    eq cur rest = cur == head xs && rest
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement the function distinct which returns True if all
@@ -50,7 +52,7 @@ allEqual xs = todo
 --   distinct [1,2] ==> True
 
 distinct :: Eq a => [a] -> Bool
-distinct = todo
+distinct xs = (length . nub) xs == length xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: implement the function middle that returns the middle value
@@ -63,7 +65,8 @@ distinct = todo
 --   middle 'b' 'a' 'c'  ==> 'b'
 --   middle 1 7 3        ==> 3
 
-middle = todo
+middle :: Ord a => a -> a -> a -> a
+middle a b c = sort [a, b, c] !! 1
 
 ------------------------------------------------------------------------------
 -- Ex 4: return the range of an input list, that is, the difference
@@ -78,8 +81,8 @@ middle = todo
 --   rangeOf [4,2,1,3]          ==> 3
 --   rangeOf [1.5,1.0,1.1,1.2]  ==> 0.5
 
-rangeOf :: [a] -> a
-rangeOf = todo
+rangeOf :: (Num a, Ord a) => [a] -> a
+rangeOf as = maximum as - minimum as
 
 ------------------------------------------------------------------------------
 -- Ex 5: given a (non-empty) list of (non-empty) lists, return the longest
@@ -97,7 +100,13 @@ rangeOf = todo
 --   longest [[1,2,3],[4,5],[6]] ==> [1,2,3]
 --   longest ["bcd","def","ab"] ==> "bcd"
 
-longest = todo
+longest :: Ord a => [[a]] -> [a]
+longest = foldr com []
+  where
+    com cur rest
+      | length cur > length rest = cur
+      | length cur == length rest = if head cur <= head rest then cur else rest
+      | otherwise = rest
 
 ------------------------------------------------------------------------------
 -- Ex 6: Implement the function incrementKey, that takes a list of
@@ -113,7 +122,7 @@ longest = todo
 --   incrementKey True [(True,1),(False,3),(True,4)] ==> [(True,2),(False,3),(True,5)]
 --   incrementKey 'a' [('a',3.4)] ==> [('a',4.4)]
 
-incrementKey :: k -> [(k,v)] -> [(k,v)]
+incrementKey :: k -> [(k, v)] -> [(k, v)]
 incrementKey = todo
 
 ------------------------------------------------------------------------------
@@ -171,10 +180,15 @@ freqs xs = todo
 -- to another.
 --
 -- However, the function should not perform the transfer if
+
 -- * the from account doesn't exist,
+
 -- * the to account doesn't exist,
+
 -- * the sum is negative,
+
 -- * or the from account doesn't have enough money.
+
 --
 -- Hint: there are many ways to implement this logic. Map.member or
 -- Map.notMember might help.
