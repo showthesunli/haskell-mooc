@@ -335,15 +335,21 @@ inc (I b) = O (inc b)
 
 prettyPrint :: Bin -> String
 prettyPrint End = ""
-prettyPrint (O b) = '0': prettyPrint b
-prettyPrint (I b) = '1': prettyPrint b
+prettyPrint (O b) =  prettyPrint b ++ ['0']
+prettyPrint (I b) =  prettyPrint b ++ ['1']
 
 fromBin :: Bin -> Int
 fromBin End = 0
-fromBin (O b) = fromBin b
-fromBin (I b) =  f 0 + fromBin b where
-  f n = 2 ^ n
-  
+fromBin bin = foldr (\(x, y) rest -> if x == '1' then 2^y + rest else rest) 0 pairs where
+  pairs = [(x,y)| (x,y) <- zip  (reverse (prettyPrint bin)) [0..]]
+
 
 toBin :: Int -> Bin
-toBin n = todo
+toBin 0 = O End
+toBin 1 = I End
+toBin 2 = O (I End)
+toBin n = case n `mod` 2 of
+  1 -> I (toBin (n `div` 2))
+  0 -> O (toBin (n `div` 2))
+  _ -> End
+
