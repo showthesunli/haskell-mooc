@@ -343,6 +343,11 @@ fromBin End = 0
 fromBin bin = foldr (\(x, y) rest -> if x == '1' then 2^y + rest else rest) 0 pairs where
   pairs = [(x,y)| (x,y) <- zip  (reverse (prettyPrint bin)) [0..]]
 
+-- fromBin :: Bin -> Int
+-- fromBin End = 0
+-- fromBin (O b) = 2 * fromBin b
+-- fromBin (I b) = 2 * fromBin b + 1
+
 
 toBin :: Int -> Bin
 toBin 0 = O End
@@ -353,3 +358,21 @@ toBin n = case n `mod` 2 of
   0 -> O (toBin (n `div` 2))
   _ -> End
 
+-- toBin :: Int -> Bin
+-- toBin n = toBin' n (O End)
+--   where
+--     toBin' 0 b = b
+--     toBin' n b = toBin' (n - 1) (inc b)
+
+
+-- challen-- An utility function for extracting the bits from an Int:
+
+-- bits :: Int -> [Int]
+-- bits 0 = [0]
+-- bits 1 = [1]
+-- bits n = n `mod` 2 : bits (n `div` 2)
+
+-- toBin :: Int -> Bin
+-- toBin n = foldr helper End (bits n)
+--   where helper 0 = O
+--         helper _ = I
