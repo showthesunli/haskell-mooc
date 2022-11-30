@@ -116,6 +116,12 @@ sumTo n = n + sumTo (n - 1)
 ------------------------------------------------------------------------------
 -- Ex 10: power n k should compute n to the power k (i.e. n^k)
 -- Use recursion.
+-- power n 0 = 1
+-- power n 1 = n * (power n 0) = n * 1
+-- power n 2 = n * (power n 1) = n * n * (power n 0) = n * n * 1
+-- .....
+-- power n k = n * (power n (k - 1))
+-- power n k = n * power n (k - 1)
 
 power :: Integer -> Integer -> Integer
 power n 0 = 1

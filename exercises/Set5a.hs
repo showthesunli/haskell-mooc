@@ -12,6 +12,7 @@ import Mooc.Todo
 -- Bus, Tram and Train.
 --
 -- The constructors don't need any fields.
+data Vehicle = Bike | Bus | Tram | Train
 
 
 ------------------------------------------------------------------------------
@@ -19,6 +20,7 @@ import Mooc.Todo
 --  - SingleTicket
 --  - MonthlyTicket "January"
 --  - MonthlyTicket "December"
+data BusTicket = SingleTicket | MonthlyTicket String
 
 
 ------------------------------------------------------------------------------
@@ -48,7 +50,7 @@ twoBananas = MkShoppingEntry "Banana" 1.1 2
 --   totalPrice twoBananas   ==> 2.2
 
 totalPrice :: ShoppingEntry -> Double
-totalPrice = todo
+totalPrice (MkShoppingEntry name price count) = price * fromIntegral count 
 
 -- buyOneMore should increment the count in an entry by one
 --
@@ -56,7 +58,7 @@ totalPrice = todo
 --   buyOneMore twoBananas    ==> MkShoppingEntry "Banana" 1.1 3
 
 buyOneMore :: ShoppingEntry -> ShoppingEntry
-buyOneMore = todo
+buyOneMore (MkShoppingEntry name price count) = MkShoppingEntry name price (count + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 4: define a datatype Person, which should contain the age (an
@@ -65,28 +67,28 @@ buyOneMore = todo
 -- Also define a Person value fred, and the functions getAge, getName,
 -- setAge and setName (see below).
 
-data Person = PersonUndefined
+data Person = MkPerson {age :: Int, name :: String}
   deriving Show
 
 -- fred is a person whose name is Fred and age is 90
 fred :: Person
-fred = todo
+fred = MkPerson {age = 90, name = "Fred"}
 
 -- getName returns the name of the person
 getName :: Person -> String
-getName p = todo
+getName = name 
 
 -- getAge returns the age of the person
 getAge :: Person -> Int
-getAge p = todo
+getAge = age
 
 -- setName takes a person and returns a new person with the name changed
 setName :: String -> Person -> Person
-setName name p = todo
+setName name p = MkPerson {age=age p, name = name}
 
 -- setAge does likewise for age
 setAge :: Int -> Person -> Person
-setAge age p = todo
+setAge age p = MkPerson {age = age, name = name p}
 
 ------------------------------------------------------------------------------
 -- Ex 5: define a datatype Position which contains two Int values, x
@@ -96,27 +98,27 @@ setAge age p = todo
 --   getY (up (up origin))    ==> 2
 --   getX (up (right origin)) ==> 1
 
-data Position = PositionUndefined
+data Position = ConsPo {x:: Int, y::Int}
 
 -- origin is a Position value with x and y set to 0
 origin :: Position
-origin = todo
+origin = ConsPo 0 0
 
 -- getX returns the x of a Position
 getX :: Position -> Int
-getX = todo
+getX = x
 
 -- getY returns the y of a position
 getY :: Position -> Int
-getY = todo
+getY = y
 
 -- up increases the y value of a position by one
 up :: Position -> Position
-up = todo
+up po = ConsPo (x po) (y po + 1)
 
 -- right increases the x value of a position by one
 right :: Position -> Position
-right = todo
+right po = ConsPo (x po + 1) (y po)
 
 ------------------------------------------------------------------------------
 -- Ex 6: Here's a datatype that represents a student. A student can
@@ -131,7 +133,10 @@ data Student = Freshman | NthYear Int | Graduated
 -- graduated student stays graduated even if he studies.
 
 study :: Student -> Student
-study = todo
+study Freshman = NthYear 1
+study Graduated = Graduated
+study (NthYear 7) = Graduated
+study (NthYear n) = NthYear ( n + 1)
 
 ------------------------------------------------------------------------------
 -- Ex 7: define a datatype UpDown that represents a counter that can
@@ -150,25 +155,28 @@ study = todo
 -- get (tick (tick (toggle (tick zero))))
 --   ==> -1
 
-data UpDown = UpDownUndefined1 | UpDownUndefined2
+data UpDown = Inc Int | Dec Int
 
 -- zero is an increasing counter with value 0
 zero :: UpDown
-zero = todo
+zero = Inc (-1)
 
 -- get returns the counter value
 get :: UpDown -> Int
-get ud = todo
+get (Inc n) = n + 1
+get (Dec n) = n - 1
 
 -- tick increases an increasing counter by one or decreases a
 -- decreasing counter by one
 tick :: UpDown -> UpDown
-tick ud = todo
+tick (Inc n) = Inc (n + 1)
+tick (Dec n) = Dec (n - 1)
 
 -- toggle changes an increasing counter into a decreasing counter and
 -- vice versa
 toggle :: UpDown -> UpDown
-toggle ud = todo
+toggle (Inc n) = Dec (n + 2)
+toggle (Dec n) = Inc (n - 2)
 
 ------------------------------------------------------------------------------
 -- Ex 8: you'll find a Color datatype below. It has the three basic
@@ -198,7 +206,11 @@ data Color = Red | Green | Blue | Mix Color Color | Invert Color
   deriving Show
 
 rgb :: Color -> [Double]
-rgb col = todo
+rgb Red = [1, 0, 0]
+rgb Green = [0, 1, 0]
+rgb Blue = [0, 0, 1]
+rgb (Invert color) = map (1 - ) (rgb color)
+rgb (Mix xs ys) = [(vx + vy) / 2 | (vx, vy) <- zip (rgb xs) (rgb ys)] 
 
 ------------------------------------------------------------------------------
 -- Ex 9: define a parameterized datatype OneOrTwo that contains one or
