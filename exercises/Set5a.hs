@@ -219,6 +219,7 @@ rgb (Mix xs ys) = [(vx + vy) / 2 | (vx, vy) <- zip (rgb xs) (rgb ys)]
 -- Examples:
 --   One True         ::  OneOrTwo Bool
 --   Two "cat" "dog"  ::  OneOrTwo String
+data OneOrTwo a = One a | Two a a  
 
 
 ------------------------------------------------------------------------------
@@ -240,15 +241,15 @@ rgb (Mix xs ys) = [(vx + vy) / 2 | (vx, vy) <- zip (rgb xs) (rgb ys)]
 -- Also define the functions toList and fromList that convert between
 -- KeyVals and lists of pairs.
 
-data KeyVals k v = KeyValsUndefined
+data KeyVals k v = Empty | Pair k v (KeyVals k v)
   deriving Show
 
 toList :: KeyVals k v -> [(k,v)]
-toList = todo
+toList Empty = []
+toList (Pair k v kvs) = (k, v) : toList kvs
 
 fromList :: [(k,v)] -> KeyVals k v
-fromList = todo
-
+fromList  = foldr (\(k, v) rest -> Pair k v rest) Empty 
 ------------------------------------------------------------------------------
 -- Ex 11: The data type Nat is the so called Peano
 -- representation for natural numbers. Define functions fromNat and
@@ -264,10 +265,16 @@ data Nat = Zero | PlusOne Nat
   deriving (Show,Eq)
 
 fromNat :: Nat -> Int
-fromNat n = todo
+fromNat Zero = 0
+fromNat (PlusOne nat) = 1 + fromNat nat
 
 toNat :: Int -> Maybe Nat
-toNat z = todo
+toNat 0 = Just Zero
+toNat n | n < 0 = Nothing
+        | otherwise = case toNat (n - 1) of
+          Nothing -> Nothing
+          (Just x) -> Just (PlusOne x)
+
 
 ------------------------------------------------------------------------------
 -- Ex 12: While pleasingly simple in its definition, the Nat datatype is not
@@ -327,10 +334,16 @@ inc (O b) = I b
 inc (I b) = O (inc b)
 
 prettyPrint :: Bin -> String
-prettyPrint = todo
+prettyPrint End = ""
+prettyPrint (O b) = '0': prettyPrint b
+prettyPrint (I b) = '1': prettyPrint b
 
 fromBin :: Bin -> Int
-fromBin = todo
+fromBin End = 0
+fromBin (O b) = fromBin b
+fromBin (I b) =  f 0 + fromBin b where
+  f n = 2 ^ n
+  
 
 toBin :: Int -> Bin
-toBin = todo
+toBin n = todo
