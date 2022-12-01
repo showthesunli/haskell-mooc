@@ -40,3 +40,5 @@ class BitOperations a where
   bitOr x y = bitNot (bitAnd (bitNot x) (bitNot y))
   bitNand :: a -> a -> a
   bitNand x y = bitNot (bitAnd x y)
+
+data Test a = T (a -> a) | E (a -> a)
