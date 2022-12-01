@@ -2,18 +2,21 @@
 
 module Set6 where
 
-import Mooc.Todo
 import Data.Char (toLower)
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: define an Eq instance for the type Country below. You'll need
 -- to use pattern matching.
 
 data Country = Finland | Switzerland | Norway
-  deriving Show
+  deriving (Show)
 
 instance Eq Country where
-  (==) = todo
+  Finland == Finland = True
+  Switzerland == Switzerland = True
+  Norway == Norway = True
+  _ == _ = False
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement an Ord instance for Country so that
@@ -22,10 +25,16 @@ instance Eq Country where
 -- Remember minimal complete definitions!
 
 instance Ord Country where
-  compare = todo -- implement me?
-  (<=) = todo -- and me?
-  min = todo -- and me?
-  max = todo -- and me?
+  compare x y
+    | x == y = EQ
+    | x <= y = LT
+    | otherwise = GT
+  Finland <= _ = True -- and me?
+  _ <= Switzerland = True
+  x <= y = x == y
+
+  min x y = if x <= y then x else y
+  max x y = if x == min x y then y else x -- and me?
 
 ------------------------------------------------------------------------------
 -- Ex 3: Implement an Eq instance for the type Name which contains a String.
@@ -38,10 +47,10 @@ instance Ord Country where
 --   Name "Pekka!" == Name "pekka"  ==> False
 
 data Name = Name String
-  deriving Show
+  deriving (Show)
 
 instance Eq Name where
-  (==) = todo
+  (==) (Name x) (Name y) = and [toLower nx == toLower ny | length x == length y, (nx, ny) <- zip x y]
 
 ------------------------------------------------------------------------------
 -- Ex 4: here is a list type parameterized over the type it contains.
@@ -52,7 +61,7 @@ instance Eq Name where
 -- remove it?
 
 data List a = Empty | LNode a (List a)
-  deriving Show
+  deriving (Show)
 
 instance Eq a => Eq (List a) where
   (==) = todo
@@ -63,18 +72,22 @@ instance Eq a => Eq (List a) where
 -- should return the price of an item.
 --
 -- The prices should be as follows:
+
 -- * chicken eggs cost 20
+
 -- * chocolate eggs cost 30
+
 -- * milk costs 15 per liter
+
 --
 -- Example:
 --   price ChickenEgg  ==>  20
 
 data Egg = ChickenEgg | ChocolateEgg
-  deriving Show
-data Milk = Milk Int -- amount in litres
-  deriving Show
+  deriving (Show)
 
+data Milk = Milk Int -- amount in litres
+  deriving (Show)
 
 ------------------------------------------------------------------------------
 -- Ex 6: define the necessary instance hierarchy in order to be able
@@ -85,7 +98,6 @@ data Milk = Milk Int -- amount in litres
 -- price [Just ChocolateEgg, Nothing, Just ChickenEgg]  ==> 50
 -- price [Nothing, Nothing, Just (Milk 1), Just (Milk 2)]  ==> 45
 
-
 ------------------------------------------------------------------------------
 -- Ex 7: below you'll find the datatype Number, which is either an
 -- Integer, or a special value Infinite.
@@ -94,8 +106,7 @@ data Milk = Milk Int -- amount in litres
 -- and Infinite is greater than any other value.
 
 data Number = Finite Integer | Infinite
-  deriving (Show,Eq)
-
+  deriving (Show, Eq)
 
 ------------------------------------------------------------------------------
 -- Ex 8: rational numbers have a numerator and a denominator that are
@@ -118,7 +129,7 @@ data Number = Finite Integer | Infinite
 --   RationalNumber 13 15 == RationalNumber 4 5  ==> False
 
 data RationalNumber = RationalNumber Integer Integer
-  deriving Show
+  deriving (Show)
 
 instance Eq RationalNumber where
   p == q = todo
@@ -182,7 +193,6 @@ instance Num RationalNumber where
 --   add [1,2] [3,4]        ==>  [1,2,3,4]
 --   add zero [True,False]  ==>  [True,False]
 
-
 ------------------------------------------------------------------------------
 -- Ex 12: cycling. Implement a type class Cycle that contains a
 -- function `step` that cycles through the values of the type.
@@ -210,6 +220,6 @@ instance Num RationalNumber where
 
 data Color = Red | Green | Blue
   deriving (Show, Eq)
+
 data Suit = Club | Spade | Diamond | Heart
   deriving (Show, Eq)
-
