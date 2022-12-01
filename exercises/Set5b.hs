@@ -223,7 +223,11 @@ set (p : ps) val (Node x y z) =
 
 search :: Eq a => a -> Tree a -> Maybe [Step]
 search _ Empty = Nothing
-search v (Node x y z) =
+search v (Node x l r) =
   if x == v
     then Just []
-    else todo
+    else case search v l of
+      Just ls -> Just (StepL : ls)
+      Nothing -> case search v r of
+        Nothing -> Nothing
+        Just rs -> Just (StepR : rs)
