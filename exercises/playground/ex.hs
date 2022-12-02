@@ -42,3 +42,6 @@ class BitOperations a where
   bitNand x y = bitNot (bitAnd x y)
 
 data Test a = T (a -> a) | E (a -> a)
+
+
+newtype Car = Car String
