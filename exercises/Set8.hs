@@ -489,19 +489,29 @@ checkered = flipBlend largeVerticalStripes2
 data Blur = Blur
   deriving (Show)
 
+-- instance Transform Blur where
+--   apply Blur (Picture pf) = Picture f
+--     where
+--       f (Coord x y) = Color r g b
+--         where
+--           up = pf (Coord x (y -1))
+--           left = pf (Coord (x -1) y)
+--           right = pf (Coord (x + 1) y)
+--           down = pf (Coord x (y + 1))
+--           cur = pf (Coord x y)
+--           r = (getRed up + getRed left + getRed right + getRed down + getRed cur) `div` 5
+--           g = (getGreen up + getGreen left + getGreen right + getGreen down + getGreen cur) `div` 5
+--           b = (getBlue up + getBlue left + getBlue right + getBlue down + getBlue cur) `div` 5
 instance Transform Blur where
   apply Blur (Picture pf) = Picture f
     where
       f (Coord x y) = Color r g b
         where
-          up = pf (Coord x (y -1))
-          left = pf (Coord (x -1) y)
-          right = pf (Coord (x + 1) y)
-          down = pf (Coord x (y + 1))
-          cur = pf (Coord x y)
-          r = (getRed up + getRed left + getRed right + getRed down + getRed cur) `div` 5
-          g = (getGreen up + getGreen left + getGreen right + getGreen down + getGreen cur) `div` 5
-          b = (getBlue up + getBlue left + getBlue right + getBlue down + getBlue cur) `div` 5
+          neighbors = [Coord (x -1) y, Coord (x + 1) y, Coord x (y + 1), Coord x (y -1), Coord x y]
+          colors = [pf coo | coo <- neighbors]
+          r = sum (map getRed colors) `div` length colors
+          g = sum (map getGreen colors) `div` length colors
+          b = sum (map getBlue colors) `div` length colors
 
 ------------------------------------------------------------------------------
 
