@@ -9,7 +9,9 @@ module Set8 where
 -- We'll use the JuicyPixels library to generate images. The library
 -- exposes the Codec.Picture module that has everything we need.
 import Codec.Picture
+import Data.Bool (Bool (False))
 import Data.Char (intToDigit)
+import Data.List (replicate)
 import Mooc.Todo
 
 -- Let's start by defining Colors and Pictures.
@@ -177,10 +179,10 @@ dotAndLine = Picture f
 --          ["7f0000","7f0000","7f0000"]]
 
 blendColor :: Color -> Color -> Color
-blendColor = todo
+blendColor (Color x y z) (Color a b c) = Color ((x + a) `div` 2) ((y + b) `div` 2) ((z + c) `div` 2)
 
 combine :: (Color -> Color -> Color) -> Picture -> Picture -> Picture
-combine = todo
+combine trans (Picture p1) (Picture p2) = Picture (\coor -> trans (p1 coor) (p2 coor))
 
 ------------------------------------------------------------------------------
 
@@ -245,7 +247,11 @@ exampleCircle = fill red (circle 80 100 200)
 --        ["000000","000000","000000","000000","000000","000000"]]
 
 rectangle :: Int -> Int -> Int -> Int -> Shape
-rectangle x0 y0 w h = todo
+rectangle x0 y0 w h = Shape re
+  where
+    re (Coord x y)
+      | x >= x0 && x < x0 + w && y >= y0 && y < y0 + h = True
+      | otherwise = False
 
 ------------------------------------------------------------------------------
 
@@ -262,10 +268,10 @@ rectangle x0 y0 w h = todo
 -- shape.
 
 union :: Shape -> Shape -> Shape
-union = todo
+union (Shape f) (Shape g) = Shape (\coor -> f coor || g coor)
 
 cut :: Shape -> Shape -> Shape
-cut = todo
+cut (Shape f) (Shape g) = Shape (\coor -> not (g coor) && f coor)
 
 ------------------------------------------------------------------------------
 
@@ -295,7 +301,7 @@ exampleSnowman = fill white snowman
 --        ["000000","000000","000000"]]
 
 paintSolid :: Color -> Shape -> Picture -> Picture
-paintSolid color shape base = todo
+paintSolid color (Shape s) (Picture p) = Picture (\coor -> if s coor then color else p coor)
 
 ------------------------------------------------------------------------------
 
@@ -346,7 +352,9 @@ stripes a b = Picture f
 --       ["000000","000000","000000","000000","000000"]]
 
 paint :: Picture -> Shape -> Picture -> Picture
-paint pat shape base = todo
+paint (Picture ex) (Shape s) (Picture base) = Picture f
+  where
+    f coor = if s coor then ex coor else base coor
 
 ------------------------------------------------------------------------------
 
@@ -412,19 +420,21 @@ xy = Picture f
 data Fill = Fill Color
 
 instance Transform Fill where
-  apply = todo
+  apply (Fill color) (Picture pf) = Picture $ const color
 
 data Zoom = Zoom Int
   deriving (Show)
 
 instance Transform Zoom where
-  apply = todo
+  apply (Zoom n) p = zoom n p
 
 data Flip = FlipX | FlipY | FlipXY
   deriving (Show)
 
 instance Transform Flip where
-  apply = todo
+  apply FlipX (Picture pf) = Picture (\(Coord x y) -> pf (Coord (- x) y))
+  apply FlipY (Picture pf) = Picture (\(Coord x y) -> pf (Coord x (- y)))
+  apply FlipXY (Picture pf) = Picture (\(Coord x y) -> pf (Coord y x))
 
 ------------------------------------------------------------------------------
 
@@ -440,8 +450,8 @@ instance Transform Flip where
 data Chain a b = Chain a b
   deriving (Show)
 
-instance Transform (Chain a b) where
-  apply = todo
+instance (Transform a, Transform b) => Transform (Chain a b) where
+  apply (Chain x y) p = apply x (apply y p)
 
 ------------------------------------------------------------------------------
 
@@ -480,7 +490,18 @@ data Blur = Blur
   deriving (Show)
 
 instance Transform Blur where
-  apply = todo
+  apply Blur (Picture pf) = Picture f
+    where
+      f (Coord x y) = Color r g b
+        where
+          up = pf (Coord x (y -1))
+          left = pf (Coord (x -1) y)
+          right = pf (Coord (x + 1) y)
+          down = pf (Coord x (y + 1))
+          cur = pf (Coord x y)
+          r = (getRed up + getRed left + getRed right + getRed down + getRed cur) `div` 5
+          g = (getGreen up + getGreen left + getGreen right + getGreen down + getGreen cur) `div` 5
+          b = (getBlue up + getBlue left + getBlue right + getBlue down + getBlue cur) `div` 5
 
 ------------------------------------------------------------------------------
 
@@ -499,7 +520,7 @@ data BlurMany = BlurMany Int
   deriving (Show)
 
 instance Transform BlurMany where
-  apply = todo
+  apply (BlurMany n) p = foldr (\cur rest -> apply cur . rest) id (replicate n Blur) p
 
 ------------------------------------------------------------------------------
 
