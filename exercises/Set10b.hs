@@ -3,13 +3,12 @@
 --
 -- In particular, seq is not available, so you must use pattern
 -- matching to force evaluation!
-
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Set10b where
 
-import Mooc.VeryLimitedPrelude
 import Mooc.Todo
+import Mooc.VeryLimitedPrelude
 
 ------------------------------------------------------------------------------
 -- Ex 1: Define the operator ||| that works like ||, but forces its
@@ -22,7 +21,9 @@ import Mooc.Todo
 --   False ||| undefined ==> an error!
 
 (|||) :: Bool -> Bool -> Bool
-x ||| y = todo
+_ ||| True = True
+False ||| False = False
+True ||| False = True
 
 ------------------------------------------------------------------------------
 -- Ex 2: Define the function boolLength, that returns the length of a
@@ -36,7 +37,9 @@ x ||| y = todo
 --   length [False,undefined] ==> 2
 
 boolLength :: [Bool] -> Int
-boolLength xs = todo
+boolLength [] = 0
+boolLength (True : xs) = 1 + boolLength xs
+boolLength (False : xs) = 1 + boolLength xs
 
 ------------------------------------------------------------------------------
 -- Ex 3: Define the function validate which, given a predicate and a
@@ -50,7 +53,7 @@ boolLength xs = todo
 --   validate (\x -> undefined) 3  ==>  an error!
 
 validate :: (a -> Bool) -> a -> a
-validate predicate value = todo
+validate predicate value = if predicate value then value else value
 
 ------------------------------------------------------------------------------
 -- Ex 4: Even though we can't implement the generic seq function
@@ -84,10 +87,13 @@ class MySeq a where
   myseq :: a -> b -> b
 
 instance MySeq Bool where
-  myseq = todo
+  myseq True x = x
+  myseq False x = x
 
 instance MySeq Int where
-  myseq = todo
+  myseq 1 y = y
+  myseq x y = y
 
 instance MySeq [a] where
-  myseq = todo
+  myseq [] b = b
+  myseq xs b = b
