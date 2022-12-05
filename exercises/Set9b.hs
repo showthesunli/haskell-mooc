@@ -138,13 +138,13 @@ sameRow :: Coord -> Coord -> Bool
 sameRow (i, j) (k, l) = i == k
 
 sameCol :: Coord -> Coord -> Bool
-sameCol (i, j) (k, l) = j == k
+sameCol (i, j) (k, l) = j == l
 
 sameDiag :: Coord -> Coord -> Bool
-sameDiag (i, j) (k, l) = i /= k && (k - i == l - j)
+sameDiag (i, j) (k, l) = k - i == l - j
 
 sameAntidiag :: Coord -> Coord -> Bool
-sameAntidiag (i, j) (k, l) = i /= k && (k - i == j - l)
+sameAntidiag (i, j) (k, l) = k - i == j - l
 
 --------------------------------------------------------------------------------
 -- Ex 4: In chess, a queen may capture another piece in the same row, column,
@@ -200,7 +200,7 @@ type Candidate = Coord
 type Stack = [Coord]
 
 danger :: Candidate -> Stack -> Bool
-danger = todo
+danger target = any (\cur -> sameRow cur target || sameCol cur target || sameDiag cur target || sameAntidiag cur target)
 
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of
@@ -235,7 +235,15 @@ danger = todo
 -- solution to this version. Any working solution is okay in this exercise.)
 
 prettyPrint2 :: Size -> Stack -> String
-prettyPrint2 = todo
+prettyPrint2 si [] = unlines (replicate si (replicate si '.'))
+prettyPrint2 si cs = build (1, 1)
+  where
+    build (i, j)
+      | j `mod` (si + 1) == 0 = '\n' : build (nextRow (i, j))
+      | (i, j) `elem` cs = 'Q' : build (nextCol (i, j))
+      | i > si = []
+      | danger (i, j) cs = '#' : build (nextCol (i, j))
+      | otherwise = '.' : build (nextCol (i, j))
 
 --------------------------------------------------------------------------------
 -- Ex 6: Now that we can check if a piece can be safely placed into a square in
@@ -280,7 +288,15 @@ prettyPrint2 = todo
 --     Q#######
 
 fixFirst :: Size -> Stack -> Maybe Stack
-fixFirst n s = todo
+fixFirst n s
+  | hx > n || hy > n = Nothing
+  | danger h t = if y > n then Nothing else fixFirst n ((x, y) : t)
+  | otherwise = Just s
+  where
+    h = head s
+    (hx, hy) = h
+    t = tail s
+    (x, y) = nextCol h
 
 --------------------------------------------------------------------------------
 -- Ex 7: We need two helper functions for stack management.
@@ -306,10 +322,10 @@ fixFirst n s = todo
 -- Hint: Remember nextRow and nextCol? Use them!
 
 continue :: Stack -> Stack
-continue s = todo
+continue s = nextRow (head s) : s
 
 backtrack :: Stack -> Stack
-backtrack s = todo
+backtrack s = nextCol (head (tail s)) : tail (tail s)
 
 --------------------------------------------------------------------------------
 -- Ex 8: Let's take a step. Our algorithm solves the problem (in a
@@ -378,7 +394,10 @@ backtrack s = todo
 --     step 8 [(6,1),(5,4),(4,2),(3,5),(2,3),(1,1)] ==> [(5,5),(4,2),(3,5),(2,3),(1,1)]
 
 step :: Size -> Stack -> Stack
-step = todo
+step n [] = continue []
+step n cs = case fixFirst n cs of
+  Nothing -> backtrack cs
+  Just x -> continue x
 
 --------------------------------------------------------------------------------
 -- Ex 9: Let's solve our puzzle! The function finish takes a partial
@@ -393,7 +412,8 @@ step = todo
 -- solve the n queens problem.
 
 finish :: Size -> Stack -> Stack
-finish = todo
+finish n [] = step n []
+finish n qs = if length qs > n then tail qs else finish n (step n qs)
 
 solve :: Size -> Stack
 solve n = finish n [(1, 1)]
