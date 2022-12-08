@@ -1,6 +1,7 @@
-printTowThings :: IO ()
-printTowThings = do
-  putStrLn "Hello!"
-  putStrLn "World!"
-
-lee = printTowThings
+ask [] = return []
+ask (question : questions) = do
+  putStr question
+  putStrLn "?"
+  answer <- getLine
+  answers <- ask questions
+  return (answer : answers)
