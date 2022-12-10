@@ -259,19 +259,28 @@ update = do
 --   parensMatch "(()))("      ==> False
 
 paren :: Char -> State Int ()
-paren x = do
+-- paren x = do
+--   init <- get
+--   if init < 0
+--     then do put init
+--     else do check x
+--   where
+--     check '(' = do
+--       init <- get
+--       put $ init + 1
+--     check ')' = do
+--       init <- get
+--       put $ init - 1
+--     check _ = get >>= put
+paren c = do
   init <- get
-  if init < 0
-    then do put init
-    else do check x
-  where
-    check '(' = do
-      init <- get
-      put $ init + 1
-    check ')' = do
-      init <- get
-      put $ init - 1
-    check _ = get >>= put
+  when
+    (init >= 0)
+    ( case c of
+        '(' -> put $ init + 1
+        ')' -> put $ init - 1
+        _ -> return ()
+    )
 
 parensMatch :: String -> Bool
 parensMatch s = count == 0
@@ -303,12 +312,18 @@ parensMatch s = count == 0
 -- PS. The order of the list of pairs doesn't matter
 
 count :: Eq a => a -> State [(a, Int)] ()
-count x = do
-  init <- get
-  let c = case lookup x init of
-        Just counter -> counter
-        Nothing -> 0
-  put $ deleteBy (\(m, _) (n, _) -> m == n) (x, c) init ++ [(x, c + 1)]
+-- count x = do
+--   init <- get
+--   let c = case lookup x init of
+--         Just counter -> counter
+--         Nothing -> 0
+--   put $ deleteBy (\(m, _) (n, _) -> m == n) (x, c) init ++ [(x, c + 1)]
+count x = modify (f x)
+  where
+    f y [] = [(y, 1)]
+    f y ((s, v) : ss)
+      | y == s = (s, v + 1) : ss
+      | otherwise = (s, v) : f y ss
 
 ------------------------------------------------------------------------------
 -- Ex 10: Implement the operation occurrences, which
