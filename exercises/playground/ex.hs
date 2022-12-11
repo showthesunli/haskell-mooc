@@ -1,12 +1,11 @@
-import Control.Monad
+substrings :: String -> [String]
+substrings xs = do
+  start <- [0 .. length xs - 1]
+  end <- [start + 1 .. length xs - 1]
+  return $ drop start $ take end $ xs
 
-getPair :: Eq a => a -> [(a, b)] -> Maybe (a, b)
-getPair target xs = if null res then Nothing else Just (head res)
+getSub :: [a] -> [[a]]
+getSub [] = []
+getSub (x : xs) = [x] : foldr f [] (getSub xs)
   where
-    res = do
-      (p, x) <- xs
-      if p == target then [(p, x)] else []
-
-ender = getPair "ender" [("ender", 13), ("orson", 6), ("scott", 5)]
-
-no = getPair "no" [("ender", 13), ("orson", 6), ("scott", 5)]
+    f ys r = ys : (x : ys) : r
