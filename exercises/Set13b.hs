@@ -240,7 +240,10 @@ sumBounded :: Int -> [Int] -> Maybe Int
 sumBounded k xs = foldM (f1 k) 0 xs
 
 f1 :: Int -> Int -> Int -> Maybe Int
-f1 k acc x = todo
+f1 k acc x =
+  if acc + x > k
+    then Nothing
+    else Just $ acc + x
 
 -- sumNotTwice computes the sum of a list, but counts only the first
 -- occurrence of each value.
@@ -254,7 +257,13 @@ sumNotTwice :: [Int] -> Int
 sumNotTwice xs = fst $ runState (foldM f2 0 xs) []
 
 f2 :: Int -> Int -> State [Int] Int
-f2 acc x = todo
+f2 acc x = do
+  init <- get
+  if x `elem` init
+    then return acc
+    else do
+      modify (x :)
+      return $ acc + x
 
 ------------------------------------------------------------------------------
 -- Ex 7: here is the Result type from Set12. Implement a Monad Result
@@ -279,7 +288,9 @@ data Result a = MkResult a | NoResult | Failure String deriving (Show, Eq)
 
 instance Functor Result where
   -- The same Functor instance you used in Set12 works here.
-  fmap = todo
+  fmap g (MkResult v) = MkResult $ g v
+  fmap _ NoResult = NoResult
+  fmap _ (Failure reason) = Failure reason
 
 -- This is an Applicative instance that works for any monad, you
 -- can just ignore it for now. We'll get back to Applicative later.
@@ -289,8 +300,11 @@ instance Applicative Result where
 
 instance Monad Result where
   -- implement return and >>=
-  return = todo
-  (>>=) = todo
+  return = MkResult
+  (>>=) resa g = case resa of
+    MkResult res -> g res
+    NoResult -> NoResult
+    Failure reason -> Failure reason
 
 ------------------------------------------------------------------------------
 -- Ex 8: Here is the type SL that combines the State and Logger
@@ -338,7 +352,12 @@ modifySL f = SL (\s -> ((), f s, []))
 
 instance Functor SL where
   -- implement fmap
-  fmap = todo
+  fmap g (SL trans) =
+    SL
+      ( \x ->
+          let (res, state, logs) = trans x
+           in (g res, state, logs)
+      )
 
 -- This is an Applicative instance that works for any monad, you
 -- can just ignore it for now. We'll get back to Applicative later.
@@ -348,8 +367,14 @@ instance Applicative SL where
 
 instance Monad SL where
   -- implement return and >>=
-  return = todo
-  (>>=) = todo
+  return x = SL (\state -> (x, state, []))
+  (>>=) sla g =
+    SL
+      ( \x ->
+          let (res, state, logs) = runSL sla x
+              (res1, state1, logs1) = runSL (g res) state
+           in (res1, state1, logs ++ logs1)
+      )
 
 ------------------------------------------------------------------------------
 -- Ex 9: Implement the operation mkCounter that produces the IO operations
@@ -377,4 +402,8 @@ instance Monad SL where
 --  4
 
 mkCounter :: IO (IO (), IO Int)
-mkCounter = todo
+mkCounter = do
+  counter <- newIORef 0
+  let inc = modifyIORef counter (+ 1)
+  let get = readIORef counter
+  return (inc, get)
