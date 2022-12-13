@@ -6,7 +6,7 @@ import Network.Wai (Application, responseLBS)
 import Network.Wai.Handler.Warp (run)
 
 port :: Int
-port = 3421
+port = 33421
 
 main :: IO ()
 main = run port application
