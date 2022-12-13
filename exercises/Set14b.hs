@@ -11,14 +11,17 @@ module Set14b where
 -- Let's start with some imports:
 
 -- Utilities
+
+-- HTTP server
+
+-- Database
+
+import Data.ByteString (head)
 import qualified Data.ByteString.Lazy as LB
 import Data.Maybe
 import qualified Data.Text as T
 import Data.Text.Encoding (encodeUtf8)
 import qualified Data.Text.Read as TR
--- HTTP server
-
--- Database
 import Database.SQLite.Simple (Connection, Query (..), execute, execute_, open, query, query_)
 import Mooc.Todo
 import Network.HTTP.Types (status200)
@@ -113,7 +116,9 @@ balanceQuery :: Query
 balanceQuery = Query (T.pack "SELECT amount FROM events WHERE account = ?;")
 
 balance :: Connection -> T.Text -> IO Int
-balance = todo
+balance con param = do
+  fr <- query con balanceQuery [param] :: IO [[Int]]
+  return $ sum $ concat fr
 
 ------------------------------------------------------------------------------
 -- Ex 3: Now that we have the database part covered, let's think about
@@ -155,7 +160,10 @@ parseInt :: T.Text -> Maybe Int
 parseInt = readMaybe . T.unpack
 
 parseCommand :: [T.Text] -> Maybe Command
-parseCommand = todo
+parseCommand ts = do
+  cmd <- ts
+  case T.unpack cmd of
+    "deposit" -> Just (Deposit)
 
 ------------------------------------------------------------------------------
 -- Ex 4: Running commands. Implement the IO operation perform that takes a
