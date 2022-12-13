@@ -160,10 +160,17 @@ parseInt :: T.Text -> Maybe Int
 parseInt = readMaybe . T.unpack
 
 parseCommand :: [T.Text] -> Maybe Command
-parseCommand ts = do
-  cmd <- ts
-  case T.unpack cmd of
-    "deposit" -> Just (Deposit)
+parseCommand (t : ts) =
+  case T.unpack t of
+    "deposit" ->
+      do
+        amount <- parseInt $ Prelude.last ts
+        let account = Prelude.head ts
+         in Just $ Deposit account amount
+    "balance" ->
+      let account = Prelude.head ts
+       in Just $ Balance account
+    _ -> Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 4: Running commands. Implement the IO operation perform that takes a
@@ -189,7 +196,16 @@ parseCommand ts = do
 --   "0"
 
 perform :: Connection -> Maybe Command -> IO T.Text
-perform = todo
+perform con mcmd = case mcmd of
+  Just cmd ->
+    case cmd of
+      Deposit q amount -> do
+        deposit con q amount
+        return $ T.pack "OK"
+      Balance q -> do
+        b <- balance con q
+        return $ T.pack $ show b
+  Nothing -> return $ T.pack "0"
 
 ------------------------------------------------------------------------------
 -- Ex 5: Next up, let's set up a simple HTTP server. Implement a WAI
@@ -209,7 +225,7 @@ encodeResponse t = LB.fromStrict (encodeUtf8 t)
 -- Remember:
 -- type Application = Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 simpleServer :: Application
-simpleServer request respond = todo
+simpleServer request respond = respond (responseLBS status200 [] (encodeResponse (T.pack "BANK")))
 
 ------------------------------------------------------------------------------
 -- Ex 6: Now we finally have all the pieces we need to actually
@@ -238,7 +254,11 @@ simpleServer request respond = todo
 -- Remember:
 -- type Application = Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 server :: Connection -> Application
-server db request respond = todo
+server db request respond = do
+  let rawcmd = pathInfo request
+      cmd = parseCommand rawcmd
+  t <- perform db cmd
+  respond (responseLBS status200 [] (encodeResponse t))
 
 port :: Int
 port = 3421

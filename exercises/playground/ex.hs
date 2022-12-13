@@ -1,5 +1,2 @@
-getNum :: Maybe a -> Maybe b -> b
-getNum x y = do
-  x' <- x
-  y' <- y
-  return y
+getNum :: Maybe a -> IO a
+getNum x = x >>= (\cur -> return cur)
