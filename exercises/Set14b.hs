@@ -153,24 +153,39 @@ balance con param = do
 --   parseCommand [T.pack "deposit", T.pack "madoff", T.pack "123456"]
 --     ==> Just (Deposit "madoff" 123456)
 
-data Command = Deposit T.Text Int | Balance T.Text
+data Command = Deposit T.Text Int | Balance T.Text | Withdraw T.Text Int
   deriving (Show, Eq)
 
 parseInt :: T.Text -> Maybe Int
 parseInt = readMaybe . T.unpack
 
 parseCommand :: [T.Text] -> Maybe Command
-parseCommand (t : ts) =
-  case T.unpack t of
-    "deposit" ->
-      do
-        amount <- parseInt $ Prelude.last ts
-        let account = Prelude.head ts
-         in Just $ Deposit account amount
-    "balance" ->
-      let account = Prelude.head ts
-       in Just $ Balance account
+-- parseCommand (t : ts) =
+--   case T.unpack t of
+--     "deposit" ->
+--       do
+--         amount <- parseInt $ Prelude.last ts
+--         let account = Prelude.head ts
+--          in Just $ Deposit account amount
+--     "balance" ->
+--       let account = Prelude.head ts
+--        in Just $ Balance account
+--     "withdraw" ->
+--       do
+--         amount <- parseInt $ Prelude.last ts
+--         let account = Prelude.head ts
+--          in Just $ Withdraw account amount
+--     _ -> Nothing
+parseCommand [c, a] =
+  if T.unpack c == "balance"
+    then Just $ Balance a
+    else Nothing
+parseCommand [cmd, account, amount] =
+  case T.unpack cmd of
+    "deposit" -> parseInt amount >>= \x -> Just $ Deposit account x
+    "withdraw" -> parseInt amount >>= \x -> Just $ Withdraw account x
     _ -> Nothing
+parseCommand _ = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 4: Running commands. Implement the IO operation perform that takes a
@@ -205,7 +220,16 @@ perform con mcmd = case mcmd of
       Balance q -> do
         b <- balance con q
         return $ T.pack $ show b
-  Nothing -> return $ T.pack "0"
+      Withdraw q amount -> do
+        b <- balance con q
+        deposit con q (- amount)
+        -- if amount > b
+        --   then do
+        --     deposit con q (- b)
+        --   else do
+        --     deposit con q (- amount)
+        return $ T.pack "OK"
+  Nothing -> return $ T.pack "ERROR"
 
 ------------------------------------------------------------------------------
 -- Ex 5: Next up, let's set up a simple HTTP server. Implement a WAI
