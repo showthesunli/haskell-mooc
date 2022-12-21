@@ -149,7 +149,8 @@ twoPersons ::
   f Int ->
   f Bool ->
   f [Person]
-twoPersons name1 age1 employed1 name2 age2 employed2 = todo
+twoPersons name1 age1 employed1 name2 age2 employed2 =
+  (\x y -> [x, y]) <$> (liftA2 Person name1 age1 <*> employed1) <*> (liftA2 Person name2 age2 <*> employed2)
 
 ------------------------------------------------------------------------------
 -- Ex 7: Validate a String that's either a Bool or an Int. The return
@@ -169,7 +170,16 @@ twoPersons name1 age1 employed1 name2 age2 employed2 = todo
 --  boolOrInt "Falseb"  ==> Errors ["Not a Bool","Not an Int"]
 
 boolOrInt :: String -> Validation (Either Bool Int)
-boolOrInt = todo
+boolOrInt s = vb <|> vi
+  where
+    mb = readMaybe s :: Maybe Bool
+    mi = readMaybe s :: Maybe Int
+    vb = case mb of
+      Just x -> pure $ Left x
+      Nothing -> invalid "Not a Bool"
+    vi = case mi of
+      Just x -> pure $ Right x
+      Nothing -> invalid "Not an Int"
 
 ------------------------------------------------------------------------------
 -- Ex 8: Improved phone number validation. Implement the function
@@ -199,7 +209,11 @@ boolOrInt = todo
 --    ==> Errors ["Too long"]
 
 normalizePhone :: String -> Validation String
-normalizePhone = todo
+normalizePhone s = checkLength snospace *> traverse checkDigit snospace
+  where
+    checkLength x = check (length x <= 10) "Too long" x
+    checkDigit x = check (isDigit x) ("Invalid character: " ++ [x]) x
+    snospace = foldr (\x rest -> if isSpace x then rest else x : rest) [] s
 
 ------------------------------------------------------------------------------
 -- Ex 9: Parsing expressions. The Expression type describes an
@@ -243,7 +257,21 @@ data Expression = Plus Arg Arg | Minus Arg Arg
   deriving (Show, Eq)
 
 parseExpression :: String -> Validation Expression
-parseExpression = todo
+parseExpression es = if isExpr then exp else invalid $ "Invalid expression: " ++ es
+  where
+    ess = words es
+    isExpr = length ess == 3
+    checkVar x = check (all isAlpha x && all isLower x && length x == 1) ("Invalid variable: " ++ x) (Variable $ head x)
+    checkNum x = check (all isDigit x) ("Invalid number: " ++ x) (Number (read x :: Int))
+    checkOp =
+      let op = ess !! 1
+       in case op of
+            "+" -> pure Plus
+            "-" -> pure Minus
+            _ -> invalid $ "Unknown operator: " ++ op
+    ex1 = checkNum e1 <|> checkVar e1 where e1 = head ess
+    ex2 = checkNum e2 <|> checkVar e2 where e2 = last ess
+    exp = checkOp <*> ex1 <*> ex2
 
 ------------------------------------------------------------------------------
 -- Ex 10: The Priced T type tracks a value of type T, and a price
@@ -272,11 +300,11 @@ data Priced a = Priced Int a
   deriving (Show, Eq)
 
 instance Functor Priced where
-  fmap = todo
+  fmap g (Priced i v) = Priced i $ g v
 
 instance Applicative Priced where
-  pure = todo
-  liftA2 = todo
+  pure x = Priced 0 x
+  liftA2 g (Priced x vx) (Priced y vy) = Priced (x + y) $ g vx vy
 
 ------------------------------------------------------------------------------
 -- Ex 11: This and the next exercise will use a copy of the
@@ -310,7 +338,9 @@ instance MyApplicative [] where
   myLiftA2 = liftA2
 
 (<#>) :: MyApplicative f => f (a -> b) -> f a -> f b
-f <#> x = todo
+f <#> x = myLiftA2 g f x
+  where
+    g f x = f x
 
 ------------------------------------------------------------------------------
 -- Ex 12: Reimplement fmap using liftA2 and pure. In practical terms,
