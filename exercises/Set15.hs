@@ -357,7 +357,7 @@ f <#> x = myLiftA2 g f x
 --  myFmap negate [1,2,3]  ==> [-1,-2,-3]
 
 myFmap :: MyApplicative f => (a -> b) -> f a -> f b
-myFmap = todo
+myFmap g fx = myPure g <#> fx
 
 ------------------------------------------------------------------------------
 -- Ex 13: Given a function that returns an Alternative value, and a
@@ -384,7 +384,7 @@ myFmap = todo
 --       ==> Errors ["zero","zero","zero"]
 
 tryAll :: Alternative f => (a -> f b) -> [a] -> f b
-tryAll = todo
+tryAll g = foldr (\cur rest -> g cur <|> rest) empty
 
 ------------------------------------------------------------------------------
 -- Ex 14: Here's the type `Both` that expresses the composition of
@@ -409,7 +409,7 @@ newtype Both f g a = Both (f (g a))
   deriving (Show)
 
 instance (Functor f, Functor g) => Functor (Both f g) where
-  fmap = todo
+  fmap func (Both ff) = Both $ fmap (fmap func) ff
 
 ------------------------------------------------------------------------------
 -- Ex 15: The composition of two Applicatives is also an Applicative!
@@ -437,5 +437,7 @@ instance (Functor f, Functor g) => Functor (Both f g) where
 --              Errors ["fail 1","fail 2"]]
 
 instance (Applicative f, Applicative g) => Applicative (Both f g) where
-  pure = todo
-  liftA2 = todo
+  pure x = Both $ pure $ pure x
+  liftA2 g (Both ba1) (Both ba2) = Both (bg <$> ba1 <*> ba2)
+    where
+      bg a b = g <$> a <*> b
