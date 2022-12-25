@@ -1,4 +1,15 @@
-import Control.Applicative (Applicative (liftA2))
+import Control.Concurrent (forkIO)
 
-lee :: Maybe Int -> Maybe Int -> Maybe [Int]
-lee m1 m2 = liftA2 (\x y -> [x, y]) m1 m2
+printA :: IO ()
+printA = do
+  putStrLn $ replicate 40 'A'
+
+printB :: IO ()
+printB = do
+  putStrLn $ replicate 40 'B'
+
+concurrency :: IO ()
+concurrency = do
+  forkIO printA
+  forkIO printB
+  return ()
