@@ -1,16 +1,18 @@
 module Set16b where
 
-import Mooc.Todo
-import Examples.Phantom
-
 import Data.Char (toUpper)
+import Examples.Phantom
+import Mooc.Todo
 
 ------------------------------------------------------------------------------
 -- Ex 1: Define a constant pounds with type Money GBP and a value of
 -- 3. The type Money is imported from Example.Phantom but you'll need
 -- to introduce GBP yourself.
 
-pounds = todo
+data GBP
+
+pounds :: Money GBP
+pounds = Money 3
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement composition for Rates. Give composeRates a
@@ -46,7 +48,6 @@ composeRates rate1 rate2 = todo
 --  fromName (toLast "smith") ==> "smith"
 --  toFirst "bob" :: Name First
 --  toLast "smith" :: Name Last
-
 
 -- Get the String contained in a name
 --fromName :: Name a -> String
@@ -93,4 +94,3 @@ toFull = todo
 
 class Render currency where
   render :: Money currency -> String
-
