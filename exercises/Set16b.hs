@@ -1,6 +1,7 @@
 module Set16b where
 
 import Data.Char (toUpper)
+import Distribution.TestSuite (TestInstance (name))
 import Examples.Phantom
 import Mooc.Todo
 
@@ -52,15 +53,26 @@ composeRates (Rate x) (Rate y) = Rate (x * y)
 
 -- Get the String contained in a name
 --fromName :: Name a -> String
-fromName = todo
+data First
+
+data Last
+
+data Full
+
+data Name name = Name String
+
+fromName :: Name n -> String
+fromName (Name n) = n
 
 -- Build a Name First
 --toFirst :: String -> Name First
-toFirst = todo
+toFirst :: String -> Name First
+toFirst = Name
 
 -- Build a Name Last
 --toLast :: String -> Name Last
-toLast = todo
+toLast :: String -> Name Last
+toLast = Name
 
 ------------------------------------------------------------------------------
 -- Ex 4: Implement the functions capitalize and toFull.
