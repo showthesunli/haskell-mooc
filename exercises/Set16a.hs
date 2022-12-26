@@ -223,7 +223,10 @@ data Expression = Plus Arg Arg | Minus Arg Arg
   deriving (Show, Eq)
 
 instance Arbitrary Arg where
-  arbitrary = todo
+  arbitrary = oneof [elements $ map Number [0 .. 10], elements $ map Variable "abcxyz"]
 
 instance Arbitrary Expression where
-  arbitrary = todo
+  arbitrary = oneof [plus, minus]
+    where
+      plus = Plus <$> arbitrary <*> arbitrary
+      minus = Minus <$> arbitrary <*> arbitrary
