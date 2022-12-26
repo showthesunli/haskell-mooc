@@ -29,7 +29,8 @@ pounds = Money 3
 usdToChf :: Rate USD CHF
 usdToChf = Rate 1.11
 
-composeRates rate1 rate2 = todo
+composeRates :: Rate a b -> Rate b c -> Rate a c
+composeRates (Rate x) (Rate y) = Rate (x * y)
 
 ------------------------------------------------------------------------------
 -- Ex 3: Tracking first, last and full names with phantom types. The
