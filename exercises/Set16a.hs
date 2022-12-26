@@ -78,10 +78,7 @@ freq1 (x : y : xs) = [(x, 1), (y, length xs + 1)]
 --  +++ OK, passed 100 tests.
 
 inputInOutput :: (Show a, Eq a) => [a] -> [(a, Int)] -> Property
-inputInOutput input output = all checkElem input === True
-  where
-    res = map fst output
-    checkElem x = x `elem` res
+inputInOutput input output = forAll (elements input) (`elem` map fst output)
 
 -- This function passes both the sumIsLength and inputInOutput tests
 freq2 :: Eq a => [a] -> [(a, Int)]
