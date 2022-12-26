@@ -110,3 +110,12 @@ toFull (Name f) (Name l) = Name $ unwords [f, l]
 
 class Render currency where
   render :: Money currency -> String
+
+instance Render EUR where
+  render (Money m) = show m ++ "e"
+
+instance Render USD where
+  render (Money m) = "$" ++ show m
+
+instance Render CHF where
+  render (Money m) = show m ++ "chf"
