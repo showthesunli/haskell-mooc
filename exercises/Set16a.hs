@@ -109,9 +109,9 @@ freq2 xs = map (\x -> (x, 1)) xs
 --  +++ OK, passed 100 tests.
 
 outputInInput :: (Show a, Eq a) => [a] -> [(a, Int)] -> Property
-outputInInput input output = all checkOutput output === True
+outputInInput input output = forAll (elements output) checkLen
   where
-    checkOutput = \(x, counter) -> length (filter (== x) input) == counter
+    checkLen (x, l) = l == length (filter (== x) input)
 
 -- This function passes the outputInInput test but not the others
 freq3 :: Eq a => [a] -> [(a, Int)]
