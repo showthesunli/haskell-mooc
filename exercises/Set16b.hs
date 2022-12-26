@@ -92,9 +92,12 @@ toLast = Name
 --  capitalize (toLast "smith") :: Name Last
 --  fromName (capitalize (toLast "smith")) ==> "Smith"
 
-capitalize = todo
+capitalize :: Name name -> Name name
+capitalize (Name (n : ns)) = Name (toUpper n : ns)
+capitalize (Name []) = Name []
 
-toFull = todo
+toFull :: Name First -> Name Last -> Name Full
+toFull (Name f) (Name l) = Name $ unwords [f, l]
 
 ------------------------------------------------------------------------------
 -- Ex 5: Type classes can let you write code that handles different
