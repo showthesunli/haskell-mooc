@@ -1,15 +1,11 @@
-import Control.Concurrent (forkIO)
+data Pair a = P a a deriving (Eq, Ord, Show)
 
-printA :: IO ()
-printA = do
-  putStrLn $ replicate 40 'A'
+class (Num a, Ord a) => Check a where
+  check :: a -> Bool
+  check a = a > 0
 
-printB :: IO ()
-printB = do
-  putStrLn $ replicate 40 'B'
+instance Check Int where
+  check n = n > 0
 
-concurrency :: IO ()
-concurrency = do
-  forkIO printA
-  forkIO printB
-  return ()
+lee :: Int
+lee = 1
